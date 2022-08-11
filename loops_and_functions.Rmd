@@ -1,0 +1,94 @@
+---
+title: "Day 4 Loops n Stuff"
+author: "Victoria Cutler"
+date: "2022-08-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+```{r}
+quarter_splits <- c(1.0, 1.1, 1.2, 1.1, 1.4, 1.5, 1.6, 1.4)
+
+half_splits <- vector(mode = "numeric", length = (length(quarter_splits)/2))
+
+for (i in seq_along(quarter_splits)) {
+half_splits[i] <- quarter_splits[i] + quarter_splits[i+1]
+}
+
+```
+
+Make a function to double the user input
+
+```{r}
+double_this <- function(my_value) {
+  print(2 * my_value)
+}
+
+double_this(my_value = 4) # this is more clear to specify the variable and you also don't need to be in order
+double_this(400)
+
+double_this(my_value = c(1, 2, 10, 100, 175)) # iterating for us!
+```
+
+Write a function that asks for a user's NAME and AGE and returns an exclamation like "I'm name, and i am age years old."
+
+```{r}
+name_age_sentence <- function(age, name) {
+  print(paste0("hi i'm ", name, ", and i am ", age, " years old."))
+}
+
+name_age_sentence(age = 25, name = "victoria")
+```
+
+```{r}
+humanage_to_animalage <- function(animal, human_age) {
+  if (animal == "dog") {
+    print(human_age * 7)
+  } else if (animal == "goat") {
+    print(human_age * 4.7)
+  } else {
+    print("warning: please enter dog or goat for animal")
+  }
+}
+
+humanage_to_animalage(animal = "dog", human_age = 12)
+humanage_to_animalage(animal = "goat", human_age = 4.2)
+humanage_to_animalage(animal = "ladybug", human_age = 2) # this is a silent failure because this ran but nothing showed up
+```
+
+```{r}
+dog_choice <- tribble(
+  ~dog_name, ~food,
+  "Khora", "everything",
+  "Teddy", "salmon",
+  "Waffle", "pancakes",
+  "Banjo", "chicken"
+)
+
+# Create a function that takes in dog name and outputs "my name is dog name and my favorite food is [food]
+dog_menu <- function(name) {
+  my_sub <- filter(dog_choice, dog_name == name) ## you always want to ask: is this variable this string? or is this variable this value?
+  print(paste0("Hi my name is ", name, " and my favorite food is ", my_sub$food, "!"))
+ #  print(my_sub)
+}
+
+dog_menu("Khora")
+```
+
+```{r}
+# essentially we're creating the apply function to calc the mean across columns and print a sentence about it. this can only work over only numeric dfs
+means_over_columns <- function(df) {
+  for (i in seq_along(df)) {
+    col_mean <- mean(df[[i]], na.rm = TRUE)
+    col_name <- colnames(df[i])
+    print(paste0("The mean value for ", col_name, " is ", col_mean, "."))
+  }
+}
+
+means_over_columns(df = mtcars)
+```
