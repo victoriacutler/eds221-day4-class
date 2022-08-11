@@ -92,3 +92,136 @@ means_over_columns <- function(df) {
 
 means_over_columns(df = mtcars)
 ```
+
+```{r}
+clothing <- c("shirt", "pants", "shoes")
+color <- c("purple", "red", "blue", "white")
+
+our_clothes <- matrix(nrow = length(color), ncol = length(clothing))
+
+for (i in seq_along(color)) {
+  for (j in seq_along(clothing)) {
+    clothing_details <- paste(color[i],clothing[j])
+    our_clothes[i,j] <- clothing_details
+  }
+}
+
+our_clothes
+```
+
+pseudo code for logistic growth: iterate over multiple times for multiple growth rates:
+
+### Logistic growth
+
+Modeling a population over time and varying growth rate
+
+```{r}
+logistic_growth <- function(K, N0, r, time) {
+  K / (1 + ((K - N0) / N0) * exp(-r * time))
+}
+
+# test:
+logistic_growth(K = 5000, N0 = 100, r = 0.07, time = 42)
+```
+
+```{r}
+time_vec <- seq(from = 0, to = 60, by = .1)
+time_vec
+
+pop_35 <- logistic_growth(N0 = 1, K = 8000, r = 0.1, time = time_vec)
+pop_35
+
+# we have two separate vectors right now but to plot we want to make these into a data frame thats time by population
+
+pop_time35_df <- data.frame(time_vec, pop_35)
+
+# now we can plot!
+pop_time35_plot <- ggplot(pop_time35_df, aes(x = time_vec, y = pop_35)) +
+  geom_point()
+pop_time35_plot
+```
+
+or instead of a vector with things that will iterate our function, we can make a for loop:
+
+```{r}
+pop_35_vec <- vector(mode = "numeric", length = length(time_vec))
+
+for (i in seq_along(time_vec)) {
+  population <- logistic_growth(N0 = 100, K = 6000, r = 0.27, time = time_vec[i])
+  pop_35_vec[i] <- population
+}
+
+pop_35_vec
+```
+
+Now let's iterate over multiple growth rates with a loop
+
+```{r}
+r_seq <- seq(from = 0.2, to = 0.4, by = 0.01)
+time_vec <- seq(from = 0, to = 60, by = .1)
+
+out_matrix <- matrix(nrow = length(time_vec), ncol = length(r_seq))
+
+for (i in seq_along(r_seq)) {
+  for (j in seq_along(time_vec)) {
+    population <- logistic_growth(N0 = 100, K = 6000, r = r_seq[i], time = time_vec[j])
+    out_matrix[j,i] <- population
+  }
+}
+
+out_matrix
+
+### now some wrangling to get time as a column on our outmatrix
+logistic_df <- data.frame(out_matrix, time = time_vec)
+
+### now we want to name our columns to be meaningful
+
+colnames(logistic_df) <- c(paste0("gr_", r_seq), "time")
+
+### how things are right now, we can't plot growth rate, so let's make that a column as well:
+
+logistic_df_long <- logistic_df |> 
+  pivot_longer(cols = -time, values_to = "population", names_to = "growth_rate") ## we want to "pivot longer" aka show all the info for everything except time and the values we're doing that to should be called population and the column names that will now be it's own column is the growth rate
+
+# ^ now we can graph everything all at once!
+
+ggplot(logistic_df_long, aes(x = time, y = population)) +
+  geom_line(aes(color = growth_rate))
+```
+
+a function with warning and an error message
+
+use `warning` to add a warning
+
+use `stop` to add an error
+
+$$
+P = 0.3\rho A v^3
+$$
+
+rho: air density (kg / m\^3)
+
+A: area covered by the turbine (m\^2)
+
+v: wind velocity (m/s)
+
+```{r}
+calc_windpower <- function(rho, radius, windspeed) {
+  
+  if (windspeed > 130) {
+    warning("Whoa, that's really fast. Are you sure?")
+  }
+  
+  if (rho > 1.225) {
+    warning("That air density is suspicious.")
+  }
+  
+  if (radius < 0) {
+    stop("Rotor radius must be a positive value in meters")
+  }
+  
+  0.3 * rho * pi * (radius^2) * (windspeed^3)
+}
+
+calc_windpower(rho = 1.226, radius = -50, windspeed = 135)
+```
